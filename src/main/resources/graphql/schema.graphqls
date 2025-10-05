@@ -1,0 +1,40 @@
+# Tipe data untuk Buku
+type Book {
+    id: ID!
+    title: String
+    author: String
+    description: String
+}
+
+# Tipe data untuk Member
+type Member {
+    id: ID!
+    memberID: String
+    name: String
+    address: String
+    phoneNumber: String
+}
+
+# Mendefinisikan semua operasi BACA data
+type Query {
+    # Query untuk Buku
+    books: [Book]
+    bookById(id: ID!): Book
+
+    # Query untuk Member (Penugasan)
+    members: [Member]
+    memberById(id: ID!): Member
+}
+
+# Mendefinisikan semua operasi UBAH data (Create, Update, Delete)
+type Mutation {
+    # Mutasi untuk Buku
+    createBook(title: String!, author: String!, description: String): Book!
+    updateBook(id: ID!, title: String, author: String, description: String): Book
+    deleteBook(id: ID!): Boolean
+
+    # Mutasi untuk Member (Penugasan)
+    createMember(memberID: String!, name: String!, address: String!, phoneNumber: String): Member!
+    updateMember(id: ID!, memberID: String, name: String, address: String, phoneNumber: String): Member
+    deleteMember(id: ID!): Boolean
+}

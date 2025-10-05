@@ -6,10 +6,8 @@ import com.polstat.perpustakaan.mapper.BookMapper;
 import com.polstat.perpustakaan.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -18,8 +16,9 @@ public class BookServiceImpl implements BookService {
     private BookRepository bookRepository;
 
     @Override
-    public void createBook(BookDto bookDto) {
-        bookRepository.save(BookMapper.mapToBook(bookDto));
+    public BookDto createBook(BookDto bookDto) {
+        Book book = bookRepository.save(BookMapper.mapToBook(bookDto));
+        return BookMapper.mapToBookDto(book);
     }
 
     @Override
@@ -30,22 +29,27 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDto> searchBooks(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getBooks();
-        }
-        List<Book> byTitle = bookRepository.findByTitleContainingIgnoreCase(keyword);
-        List<Book> byAuthor = bookRepository.findByAuthorContainingIgnoreCase(keyword);
-
-        List<Book> combined = new ArrayList<>(byTitle);
-        for (Book b : byAuthor) {
-            if (combined.stream().noneMatch(x -> x.getId().equals(b.getId()))) {
-                combined.add(b);
-            }
-        }
-
-        return combined.stream()
-                .map(BookMapper::mapToBookDto)
-                .collect(Collectors.toList());
+    public BookDto getBook(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+        return BookMapper.mapToBookDto(book);
     }
+
+    @Override
+    public BookDto updateBook(BookDto bookDto) {
+        // Pastikan buku ada sebelum update
+        bookRepository.findById(bookDto.getId())
+                .orElseThrow(() -> new RuntimeException("Book not found with id: " + bookDto.getId()));
+        Book book = bookRepository.save(BookMapper.mapToBook(bookDto));
+        return BookMapper.mapToBookDto(book);
+    }
+
+    @Override
+    public void deleteBook(Long id) {
+        if (!bookRepository.existsById(id)) {
+            throw new RuntimeException("Book not found with id: " + id);
+        }
+        bookRepository.deleteById(id);
+    }
+
 }
