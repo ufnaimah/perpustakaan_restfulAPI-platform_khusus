@@ -15,22 +15,17 @@ public class BookGraphqlController {
     @Autowired
     private BookService bookService;
 
-    // Resolver untuk query "books"
     @QueryMapping
     public List<BookDto> books() {
         return bookService.getBooks();
     }
 
-    // Resolver untuk query "bookById"
     @QueryMapping
     public BookDto bookById(@Argument Long id) {
-        // Anda perlu menambahkan method getBookById di service Anda
-        // Untuk saat ini, kita bisa gunakan Optional
-        return bookService.getBooks().stream()
-                .filter(book -> book.getId().equals(id)).findFirst().orElse(null);
+        return bookService.getBook(id);
     }
 
-    // Resolver untuk mutasi "createBook"
+    // --- PERBAIKAN PADA CREATEBOOK ---
     @MutationMapping
     public BookDto createBook(@Argument String title, @Argument String author, @Argument String description) {
         BookDto bookDto = BookDto.builder()
@@ -38,9 +33,25 @@ public class BookGraphqlController {
                 .author(author)
                 .description(description)
                 .build();
-        bookService.createBook(bookDto);
-        return bookDto;
+        // Kembalikan hasil dari service, bukan bookDto lokal
+        return bookService.createBook(bookDto);
     }
 
-    // Dan seterusnya untuk update dan delete...
+    // --- PERBAIKAN PADA UPDATEBOOK ---
+    @MutationMapping
+    public BookDto updateBook(@Argument Long id, @Argument String title, @Argument String author, @Argument String description) {
+        BookDto bookDto = BookDto.builder()
+                .id(id) // Sertakan ID untuk operasi update
+                .title(title)
+                .author(author)
+                .description(description)
+                .build();
+        return bookService.updateBook(bookDto);
+    }
+
+    @MutationMapping
+    public boolean deleteBook(@Argument Long id) {
+        bookService.deleteBook(id);
+        return true;
+    }
 }

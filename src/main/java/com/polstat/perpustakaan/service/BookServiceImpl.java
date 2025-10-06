@@ -17,8 +17,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto createBook(BookDto bookDto) {
-        Book book = bookRepository.save(BookMapper.mapToBook(bookDto));
-        return BookMapper.mapToBookDto(book);
+        Book book = BookMapper.mapToBook(bookDto);
+        Book savedBook = bookRepository.save(book); // Simpan ke DB
+        return BookMapper.mapToBookDto(savedBook); // Kembalikan objek yang sudah disimpan (dengan ID)
     }
 
     @Override
@@ -37,11 +38,18 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDto updateBook(BookDto bookDto) {
-        // Pastikan buku ada sebelum update
-        bookRepository.findById(bookDto.getId())
+        // 1. Pastikan buku yang akan diupdate ada di database
+        Book existingBook = bookRepository.findById(bookDto.getId())
                 .orElseThrow(() -> new RuntimeException("Book not found with id: " + bookDto.getId()));
-        Book book = bookRepository.save(BookMapper.mapToBook(bookDto));
-        return BookMapper.mapToBookDto(book);
+
+        // 2. Lakukan pembaruan pada field yang ada
+        existingBook.setTitle(bookDto.getTitle());
+        existingBook.setAuthor(bookDto.getAuthor());
+        existingBook.setDescription(bookDto.getDescription());
+
+        // 3. Simpan perubahan dan kembalikan hasilnya
+        Book updatedBook = bookRepository.save(existingBook);
+        return BookMapper.mapToBookDto(updatedBook);
     }
 
     @Override
@@ -51,5 +59,4 @@ public class BookServiceImpl implements BookService {
         }
         bookRepository.deleteById(id);
     }
-
 }

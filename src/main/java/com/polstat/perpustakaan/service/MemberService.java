@@ -9,4 +9,7 @@ public interface MemberService {
     MemberDto createMember(MemberDto memberDto);
     MemberDto updateMember(Long id, MemberDto memberDto);
     void deleteMember(Long id);
+
+    // Penambahan baru
+    List<MemberDto> getMembersByName(String name);
 }
